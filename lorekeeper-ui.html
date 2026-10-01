@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoreKeeper - AI Worldbuilding Agent (3D Edition)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #0f1115;
+      background-image: radial-gradient(circle at 50% 0%, #1a1e29 0%, #0f1115 100%);
+      color: #d1d5db;
+      font-family: 'Crimson Text', serif;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      perspective: 1000px; /* 3D Perspective on body */
+    }
+    h1, h2, h3, .title-font {
+      font-family: 'Cinzel', serif;
+    }
+    .gold-accent {
+      color: #d4af37;
+      text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    }
+    .border-gold {
+      border-color: #d4af37;
+    }
+    /* 3D Glass Panel */
+    .glass-panel {
+      background: rgba(20, 24, 33, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+    /* 3D Orb Animation */
+    .orb-container {
+      perspective: 800px;
+      transform-style: preserve-3d;
+    }
+    .orb-3d {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b, #000);
+      box-shadow: 0 0 20px #d4af37, inset -10px -10px 20px rgba(0,0,0,0.8);
+      animation: floatRotate 6s infinite linear;
+      transform-style: preserve-3d;
+    }
+    .orb-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 55px; height: 55px;
+      border: 2px solid rgba(212, 175, 55, 0.5);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotateX(75deg);
+      animation: spinRing 4s infinite linear;
+    }
+    @keyframes floatRotate {
+      0% { transform: rotateY(0deg) translateY(0px); }
+      50% { transform: rotateY(180deg) translateY(-8px); }
+      100% { transform: rotateY(360deg) translateY(0px); }
+    }
+    @keyframes spinRing {
+      0% { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(0deg); }
+      100% { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(360deg); }
+    }
+    
+    .message-agent { background: rgba(212, 175, 55, 0.05); border-left: 2px solid #d4af37; transform: translateZ(20px); }
+    .message-user { background: rgba(59, 130, 246, 0.05); border-right: 2px solid #3b82f6; transform: translateZ(20px); }
+    
+    /* Floating Particles */
+    .particle {
+      position: absolute;
+      background: #d4af37;
+      border-radius: 50%;
+      opacity: 0.5;
+      pointer-events: none;
+      animation: drift 10s infinite linear;
+    }
+    @keyframes drift {
+      from { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      to { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body class="flex flex-col relative" id="scene">
+
+  <!-- Magic Particles Background -->
+  <div id="particles" class="absolute inset-0 z-0 overflow-hidden pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="p-4 border-b border-gold border-opacity-20 flex justify-between items-center bg-black bg-opacity-50 z-10 relative">
+    <div class="flex items-center gap-4">
+      <!-- 3D Orb -->
+      <div class="orb-container relative w-12 h-12 flex items-center justify-center">
+        <div class="orb-3d"></div>
+        <div class="orb-ring"></div>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold gold-accent tracking-wider">LoreKeeper</h1>
+        <p class="text-sm text-gray-400 italic">Grounded Context Engine</p>
+      </div>
+    </div>
+    <div class="flex gap-4 text-sm">
+      <div class="flex items-center gap-2 px-3 py-1 bg-green-900 bg-opacity-30 border border-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.3)]">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+        <span class="text-green-400 font-bold tracking-widest text-xs uppercase">Neural Link Active</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="flex-1 flex overflow-hidden z-10 relative p-6 gap-8 perspective-container">
+    
+    <!-- Left Sidebar: Sanity Database Live View -->
+    <aside class="w-1/3 flex flex-col glass-panel rounded-xl overflow-hidden" id="panel-left">
+      <div class="p-4 border-b border-gold border-opacity-20 bg-black bg-opacity-40 title-font font-bold text-xl gold-accent flex justify-between items-center transform translate-z-10">
+        <span>📜 The Codex (Sanity DB)</span>
+        <div class="w-4 h-4 border-2 border-gold rounded-full border-t-transparent animate-spin"></div>
+      </div>
+      
+      <div class="flex-1 overflow-y-auto p-5 space-y-6 text-sm" style="transform: translateZ(30px);">
+        <!-- Document 1 -->
+        <div class="p-3 bg-gray-900 bg-opacity-50 rounded border border-gray-700 hover:border-gold transition-colors duration-300">
+          <h3 class="text-white font-bold mb-2 flex items-center gap-2 text-lg">
+            🏰 The Capital City
+            <span class="text-[10px] bg-gray-800 border border-gray-600 text-gray-400 px-2 py-0.5 rounded-full uppercase tracking-wider">Location</span>
+          </h3>
+          <ul class="list-disc list-inside text-gray-400 space-y-2 ml-1">
+            <li><span class="text-red-400 font-semibold">Law:</span> Magic is strictly forbidden under penalty of death.</li>
+            <li><span class="text-gray-300 font-semibold">Ruler:</span> King Alden</li>
+          </ul>
+        </div>
+
+        <!-- Document 2 -->
+        <div class="p-3 bg-gray-900 bg-opacity-50 rounded border border-gray-700 hover:border-gold transition-colors duration-300">
+          <h3 class="text-white font-bold mb-2 flex items-center gap-2 text-lg">
+            👑 King Alden
+            <span class="text-[10px] bg-gray-800 border border-gray-600 text-gray-400 px-2 py-0.5 rounded-full uppercase tracking-wider">NPC</span>
+          </h3>
+          <ul class="list-disc list-inside text-gray-400 space-y-2 ml-1">
+            <li><span class="text-blue-400 font-semibold">Trait:</span> Extremely paranoid about magic.</li>
+            <li><span class="text-blue-400 font-semibold">Trait:</span> Corrupt; easily bribed with gold.</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right Panel: Agent Chat -->
+    <section class="flex-1 flex flex-col glass-panel rounded-xl overflow-hidden relative" id="panel-right">
+      <div class="p-4 border-b border-gold border-opacity-20 bg-black bg-opacity-40 title-font font-bold text-xl text-white shadow-md z-20">
+        The Oracle's Chamber
+      </div>
+      
+      <!-- Chat Area -->
+      <div class="flex-1 overflow-y-auto p-8 space-y-8 z-10" id="chat-box" style="transform-style: preserve-3d;">
+        <!-- Welcome Message -->
+        <div class="message-agent p-5 rounded-lg shadow-lg w-5/6 text-lg">
+          <p class="mb-2"><strong>LoreKeeper:</strong> Welcome, Traveler. I am the voice of the Codex. I draw my knowledge directly from the structured archives of Sanity.</p>
+          <p class="text-gray-400 text-base">What action would you like to take in the realm today?</p>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="p-5 border-t border-gold border-opacity-20 bg-black bg-opacity-60 z-20" style="transform: translateZ(40px);">
+        <div class="flex gap-4 relative">
+          <input type="text" id="user-input" class="flex-1 bg-[#0a0c10] border border-gray-700 rounded-xl px-5 py-4 text-lg text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition shadow-inner font-sans placeholder-gray-600" placeholder="e.g., I cast a fireball in the center of The Capital..." autocomplete="off">
+          <button id="send-btn" class="bg-gradient-to-b from-gray-800 to-black border border-gold text-gold-accent hover:from-gray-700 hover:to-gray-900 px-8 py-4 rounded-xl font-bold title-font text-lg transition shadow-[0_0_15px_rgba(212,175,55,0.2)] hover:shadow-[0_0_25px_rgba(212,175,55,0.4)] transform hover:-translate-y-1">
+            Declare Action
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // 3D Parallax Mouse Tracking
+    document.addEventListener('mousemove', (e) => {
+      const xAxis = (window.innerWidth / 2 - e.pageX) / 40;
+      const yAxis = (window.innerHeight / 2 - e.pageY) / 40;
+      
+      document.getElementById('panel-left').style.transform = `rotateY(${xAxis}deg) rotateX(${-yAxis}deg)`;
+      document.getElementById('panel-right').style.transform = `rotateY(${xAxis}deg) rotateX(${-yAxis}deg)`;
+    });
+
+    // Particle Generator
+    const particlesContainer = document.getElementById('particles');
+    for(let i=0; i<30; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.width = Math.random() * 4 + 'px';
+      p.style.height = p.style.width;
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.animationDuration = (Math.random() * 10 + 5) + 's';
+      p.style.animationDelay = (Math.random() * 5) + 's';
+      particlesContainer.appendChild(p);
+    }
+
+    // Chat Logic
+    const input = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const chatBox = document.getElementById('chat-box');
+    let isProcessing = false;
+
+    function addMessage(text, isUser = false) {
+      const div = document.createElement('div');
+      const align = isUser ? 'ml-auto' : 'mr-auto';
+      const style = isUser ? 'message-user text-blue-100' : 'message-agent text-gray-200';
+      
+      div.className = `${style} p-5 rounded-lg shadow-xl w-5/6 ${align} text-lg`;
+      div.innerHTML = text;
+      
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function handleSend() {
+      if(isProcessing || !input.value.trim()) return;
+      
+      const text = input.value;
+      input.value = '';
+      addMessage(`<strong>You:</strong> ${text}`, true);
+      isProcessing = true;
+
+      const typingDiv = document.createElement('div');
+      typingDiv.className = `message-agent p-5 rounded-lg shadow-xl w-5/6 mr-auto text-gold-accent italic flex items-center gap-3 font-sans text-base`;
+      typingDiv.innerHTML = `<div class="w-5 h-5 border-2 border-gold rounded-full border-t-transparent animate-spin"></div> <span>Consulting the Sanity MCP... verifying world constraints...</span>`;
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      setTimeout(() => {
+        typingDiv.remove();
+        let response = "";
+        const lower = text.toLowerCase();
+        
+        if(lower.includes("fireball") || lower.includes("magic")) {
+          response = `<strong>LoreKeeper:</strong> <span class="text-red-400 font-bold uppercase tracking-widest text-sm block mb-2 border-b border-red-900 pb-1">Error: Constraint Violated</span>I have consulted the Codex. According to the Sanity database, <em>Magic is strictly forbidden</em> in The Capital. Furthermore, King Alden is <em>extremely paranoid about magic</em>. <br><br>If you attempt this, you will be instantly arrested and executed by the Royal Guard.`;
+        } else {
+          response = `<strong>LoreKeeper:</strong> <span class="text-green-400 font-bold uppercase tracking-widest text-sm block mb-2 border-b border-green-900 pb-1">Action Logged</span>I have recorded your action in the timeline. The world reacts normally.`;
+        }
+        addMessage(response, false);
+        isProcessing = false;
+      }, 1800);
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    input.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') handleSend();
+    });
+  </script>
+</body>
+</html>

@@ -1,4 +1,3 @@
-import { topicType } from './topic';
-import { tutorialType } from './tutorial';
+import { exhibitType } from './exhibit';
 
-export const schemaTypes = [topicType, tutorialType];
+export const schemaTypes = [exhibitType];
