@@ -4,35 +4,42 @@ import subprocess
 import edge_tts
 from PIL import Image, ImageDraw, ImageFont
 
-# Video using EXCLUSIVELY the photos provided by the user
+# Video using EXCLUSIVELY the Cover Page and the 3 Photos provided by the user
 scenes = [
+    {
+        "id": "cover_intro",
+        "image": "cover.png",
+        "title": "THE LIVING MUSEUM — SANITY CHALLENGE 2026",
+        "subtitle": "Walk Through a 3D Gallery Where Every Exhibit is Live Sanity Content",
+        "text": "Welcome to The Living Museum, built for the DEV Sanity Challenge. Step inside an interactive three-dimensional gallery where every single exhibit is live, structured content powered by Sanity."
+    },
     {
         "id": "user_scene1",
         "image": "user_shot_01_modal.png",
         "title": "ROOM 1 (INVENTIONS) & 4-ARROW D-PAD",
-        "subtitle": "4-Directional Arrow Controls & Smooth First-Person Walk",
-        "text": "Welcome to the Museum of Code, an interactive 3D living museum built for the Sanity Challenge. Here in Room 1, Inventions, you can explore foundational technological breakthroughs. At the bottom right, four directional arrow buttons give you full continuous walking control to move forward, backward, left, and right across the three-dimensional gallery."
+        "subtitle": "4-Directional Arrow Controls & Smooth Continuous Walk",
+        "text": "Step inside Room 1, Inventions. At the bottom right, four directional arrow buttons give you full continuous walking control to move forward, backward, left, and right across the three-dimensional space."
     },
     {
         "id": "user_scene2",
         "image": "user_shot_01_modal.png",
         "title": "CLICK TO INSPECT EXHIBIT",
         "subtitle": "Steam Engine • James Watt (1776 AD) • Sanity Lifecycle: ACTIVE",
-        "text": "Clicking directly on any exhibit, like the Steam Engine, opens a rich interactive inspection modal. It displays the authentic visual artifact, creator James Watt, the era of 1776, a historical summary, and its live Sanity lifecycle status and vitality index, streaming directly from our Content Lake."
+        "text": "Clicking directly on any exhibit, like the Steam Engine, opens a live inspection modal displaying the authentic visual artifact, creator James Watt, the era of 1776, a historical summary, and its live Sanity lifecycle status and vitality bar."
     },
     {
         "id": "user_scene3",
         "image": "user_shot_02_walk_rooms.png",
         "title": "ROOM 2 (ART) & 4 THEMATIC ROOMS",
         "subtitle": "Room 1 Inventions • Room 2 Art • Room 3 History • Room 4 Future",
-        "text": "As you move through the museum, you can navigate across four thematic wings: Room 1 for Inventions, Room 2 for Art, Room 3 for History, and Room 4 for Future frontier concepts. The first-person camera smoothly glides down the grand hall past marble pedestals and classical archways."
+        "text": "Navigate smoothly across four dedicated thematic halls: Inventions, Art, History, and Future technologies as you glide past marble pedestals and classical archways down the grand hall."
     },
     {
         "id": "user_scene4",
         "image": "user_shot_03_night_mode.png",
         "title": "NIGHT MODE / DARK MODE",
         "subtitle": "Dynamic Nocturnal Atmosphere with Spotlight Illumination",
-        "text": "Toggling the button in the top right engages Night Mode, transforming the sunlit gallery into a dramatic dark mode atmosphere illuminated by focal lanterns and moonlight. Experience the entire living museum live now on Vercel."
+        "text": "With a single tap on the theme button in the top right, Night Mode transforms the sunlit gallery into a dramatic dark mode atmosphere illuminated by focal lanterns. Experience the living museum live now on Vercel."
     }
 ]
 
@@ -88,7 +95,7 @@ async def generate_audio():
         print(f"Scene {idx+1} duration: {scene['duration']:.2f}s")
 
 def build_video_clips():
-    print("Building video clips using user photos...")
+    print("Building video clips using user photos and cover...")
     concat_list = []
     
     for idx, scene in enumerate(scenes):
@@ -129,9 +136,9 @@ def build_video_clips():
     ]
     subprocess.run(concat_cmd, check=True)
     
-    # Also overwrite Museum_Interactive_Tour.mp4 so both files have the user photos
+    # Also overwrite Museum_Interactive_Tour.mp4
     subprocess.run(["ffmpeg", "-y", "-i", output_video, "-c", "copy", "Museum_Interactive_Tour.mp4"], check=True)
-    print("SUCCESS: Demo videos successfully rendered using user photos!")
+    print("SUCCESS: Demo videos successfully rendered with cover page and user photos!")
 
 if __name__ == "__main__":
     prepare_styled_frames()
