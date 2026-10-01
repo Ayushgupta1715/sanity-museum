@@ -31,6 +31,9 @@ export default function Home() {
   const [targetZ, setTargetZ] = useState<number>(18);
   const [targetX, setTargetX] = useState<number>(0);
   const [isNightMode, setIsNightMode] = useState<boolean>(false);
+  if (typeof window !== 'undefined') {
+    (window as any).__setSelectedExhibit = setSelectedExhibit;
+  }
 
   // Walk constraints
   const moveForward = () => setTargetZ(prev => Math.max(prev - 5, -120));
